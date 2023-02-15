@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mnist+tfjs</title>
+  </head>
+  <body class="dark:bg-zinc-900 dark:text-zinc-50">
+    <div id="app" class="flex-col h-full w-fulll p-2 space-y-4">
+      <h1 title="MNIST + TensorflowJS" class="m-auto text-center text-3xl pt-4">MNIST + TF</h1>
+      <canvas id="renderer" class="mx-auto"></canvas>
+      <div class="text-center">
+        <p title="Neural Network number output" id="predict" class="text-xl"></p>
+        <div id="debug_info"></div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
