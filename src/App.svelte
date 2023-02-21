@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from 'svelte'
   import * as tf from '@tensorflow/tfjs'
   import * as THREE from 'three'
+  import {Vector2} from 'three'
 
   let container: HTMLDivElement
   let canvas: HTMLCanvasElement
@@ -55,48 +56,107 @@
   )
   scene.add(circle)
 
-  let number_guessed = 0
+  let guessed = 0
   let confidence = 0
-  let animation_id = 0
+  let animationID = 0
+  let outputs: number[] = new Array(10).fill(0.0)
 
   function loop(now: number) {
     renderer.clear()
     renderer.render(scene, camera)
-    animation_id = requestAnimationFrame(loop)
+    animationID = requestAnimationFrame(loop)
   }
 
   function onResize() {
-    renderer.setSize(container.clientWidth, container.clientWidth)
+    renderer.setSize(
+      container.clientWidth * window.devicePixelRatio,
+      container.clientWidth * window.devicePixelRatio,
+      false
+    )
+  }
+
+  function onMove(pos: Vector2) {
+  }
+
+  function onMouseMove(e: MouseEvent) {
+    onMove(new Vector2(
+      e.clientX / window.innerWidth,
+      e.clientY / window.innerHeight
+    ))
+  }
+
+  function onMouseDown(e: MouseEvent) {
+  }
+
+  function onMouseUp(e: MouseEvent) {
   }
 
   onMount(async () => {
     camera.position.set(0, 0, 10)
-
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
-    renderer.setSize(container.clientWidth, container.clientWidth)
+    onResize()
     renderer.setClearColor(0xFF00FF, 1)
 
+    // Register events
     window.addEventListener('resize', onResize)
+    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mousedown', onMouseDown)
+    window.addEventListener('mousedown', onMouseUp)
     loop(0)
   })
 
   onDestroy(async () => {
-    cancelAnimationFrame(animation_id)
+    cancelAnimationFrame(animationID)
     renderer.dispose()
-    animation_id = 0
+    animationID = 0
+
+    // Unregister events
     window.removeEventListener('resize', onResize)
+    window.removeEventListener('mousemove', onMouseMove)
+    window.removeEventListener('mousedown', onMouseDown)
+    window.removeEventListener('mousedown', onMouseUp)
   })
 </script>
 
-<main class="p-6 flex-col space-y-4">
+<main class="flex-row">
   <h1 class="text-center text-2xl">MNIST + TF</h1>
-  <div id="canvas_render" class="w-full md:w-[256px] overflow-clip mx-auto" bind:this={container}>
-    <canvas bind:this={canvas} class="w-full h-full"></canvas>
+  <div class="flex flex-shrink-1">
+    <div id="canvas_render" class="w-full md:w-[256px] overflow-clip" bind:this={container}>
+      <canvas bind:this={canvas} class="w-full h-full"></canvas>
+    </div>
+    <div>
+      <p>Detected: {guessed}</p>
+      <p>Confidence: {confidence.toPrecision(3)}</p>
+      <p>Model Outputs</p>
+      <div class="flex space-x-2">
+        {#each outputs as confidence, i}
+          <span>{i}:{confidence.toPrecision(3)}</span>
+        {/each}
+      </div>
+    </div>
+    <div>
+      <p>Model Info</p>
+    </div>
   </div>
-  <div class="info">
-    <span>{number_guessed}</span>
-    <span>,</span>
-    <span>{confidence.toPrecision(3)}</span>
-  </div>
-  <footer></footer>
+  <footer class="mt-auto">
+    <div>
+      <a
+        rel="noreferrer"
+        href='https://github.com/mnerv/cnn_from_scratch'
+        title='Open Github repository for CNN model source code'
+        target='_blank'
+      >
+      Model Source Code
+      </a>
+      <span>|</span>
+      <a
+        rel="noreferrer"
+        href='https://github.com/mnerv/mnistplustf'
+        title='Open Github repository for website source code'
+        target='_blank'
+      >
+      Source Code
+      </a>
+    </div>
+  </footer>
 </main>
